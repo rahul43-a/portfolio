@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rahul Dhiman | Portfolio</title>
+  <style>
+    /* Reset and base styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fafafa;
+  color: #222;
+}
+
+.container {
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* Header */
+header {
+  background: #333;
+  color: white;
+  padding: 15px 0;
+}
+
+header h1 {
+  display: inline-block;
+  margin: 0;
+}
+
+nav {
+  float: right;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+nav li {
+  margin-left: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#menu-toggle {
+  display: none;
+  background: none;
+  color: white;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Hero Section */
+.hero {
+  background-color: #007BFF;
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* Sections */
+section {
+  padding: 40px 0;
+}
+
+.skills ul {
+  list-style-type: square;
+  padding-left: 20px;
+}
+
+footer {
+  background: #333;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  margin-top: 40px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  nav ul {
+    flex-direction: column;
+    display: none;
+  }
+  #menu-toggle {
+    display: inline-block;
+  }
+  nav ul.show {
+    display: flex;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>Rahul Dhiman</h1>
+      <nav>
+        <ul id="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button id="menu-toggle">☰</button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Hello, I'm Rahul Dhiman</h2>
+      <p>Full Stack Developer in Training at HIIT, Ambala</p>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="container">
+      <h2>About Me</h2>
+      <p>
+        I recently completed my 12th from CBSE Board. Currently, I am pursuing a Full Stack course at HIIT, Ambala.
+        My main focus is to become a skilled website developer.
+      </p>
+    </div>
+  </section>
+
+  <section id="skills" class="skills">
+    <div class="container">
+      <h2>My Skills</h2>
+      <ul>
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>Java (Basics from HIIT)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2>Contact Me</h2>
+      <p>Email: <a href="mailto:rahuldhiman8168@gmail.com">rahuldhiman8168@gmail.com</a></p>
+      <p>Phone: <a href="tel:+918168754225">+91 8168754225</a></p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 Rahul Dhiman</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

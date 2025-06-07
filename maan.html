@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rahul Dhiman | Portfolio</title>
+  <style>
+    /* Reset some default spacing */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.container {
+  width: 90%;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px 0;
+}
+
+header {
+  background-color: #222;
+  color: #fff;
+  padding: 15px 0;
+}
+
+header h1 {
+  display: inline-block;
+  margin: 0;
+}
+
+nav {
+  float: right;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  margin-left: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+#menu-toggle {
+  display: none;
+  background: none;
+  color: white;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+.hero {
+  background: #007BFF;
+  color: white;
+  padding: 60px 0;
+  text-align: center;
+}
+
+section {
+  padding: 40px 0;
+}
+
+.projects ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.projects li {
+  background-color: #e9ecef;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+footer {
+  background: #222;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  nav ul {
+    flex-direction: column;
+    display: none;
+  }
+
+  #menu-toggle {
+    display: inline-block;
+  }
+
+  nav ul.show {
+    display: flex;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>Rahul Dhiman</h1>
+      <nav>
+        <ul id="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Skills</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button id="menu-toggle">☰</button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Welcome! I'm Rahul Dhiman</h2>
+      <p>Pursuing Full Stack Development at HIIT</p>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="container">
+      <h2>About Me</h2>
+      <p>
+        Hello! I am Rahul Dhiman, currently pursuing a <strong>Full Stack Development</strong> course at HIIT. 
+        I’m passionate about creating dynamic, responsive web applications and love exploring both front-end and back-end technologies.
+      </p>
+    </div>
+  </section>
+
+  <section id="projects" class="projects">
+    <div class="container">
+      <h2>My Skills</h2>
+      <ul>
+        <li>🔧 HTML</li>
+        <li>🔧 CSS</li>
+        <li>🔧 Java (Core Java)</li>
+        <li>📘 Learning Full Stack Development</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2>Contact Me</h2>
+      <p>Email: <a href="mailto:rahuldhiman8168@gmail.com">rahuldhiman8168@gmail.com</a></p>
+      <p>Phone: <a href="tel:14465416516">+91 14465 416516</a></p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 Rahul Dhiman | Full Stack Developer</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
