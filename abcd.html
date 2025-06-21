@@ -1,168 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rahul Dhiman | Portfolio</title>
-  <style>
-    /* Reset and base styles */
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fafafa;
-  color: #222;
-}
-
-.container {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px 0;
-}
-
-/* Header */
-header {
-  background: #333;
-  color: white;
-  padding: 15px 0;
-}
-
-header h1 {
-  display: inline-block;
-  margin: 0;
-}
-
-nav {
-  float: right;
-}
-
-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-}
-
-nav li {
-  margin-left: 20px;
-}
-
-nav a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-#menu-toggle {
-  display: none;
-  background: none;
-  color: white;
-  font-size: 24px;
-  border: none;
-  cursor: pointer;
-}
-
-/* Hero Section */
-.hero {
-  background-color: #007BFF;
-  color: white;
-  text-align: center;
-  padding: 60px 20px;
-}
-
-/* Sections */
-section {
-  padding: 40px 0;
-}
-
-.skills ul {
-  list-style-type: square;
-  padding-left: 20px;
-}
-
-footer {
-  background: #333;
-  color: white;
-  text-align: center;
-  padding: 15px 0;
-  margin-top: 40px;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  nav ul {
-    flex-direction: column;
-    display: none;
-  }
-  #menu-toggle {
-    display: inline-block;
-  }
-  nav ul.show {
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotify-Style Player</title>
+<style>
+  /* ⚡ Global Styles */
+  * {box-sizing: border-box; margin:0; padding:0;}
+  body {
     display: flex;
+    height: 100vh;
+    font-family: 'Segoe UI',sans-serif;
   }
-}
+  a {color: inherit; text-decoration:none; cursor:pointer;}
+  ul {list-style:none;}
 
-  </style>
+  /* 🎯 Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #040404;
+    padding:1rem;
+    display:flex;
+    flex-direction:column;
+  }
+  .logo {color:#1DB954; font-size:1.5rem; font-weight:bold; margin-bottom:2rem;}
+  .nav {margin-bottom:2rem;}
+  .nav a {display:block; padding:0.5rem 0; color:#b3b3b3;}
+  .nav a:hover {color:#fff;}
+
+  /* 🎵 Playlist Section */
+  .playlist-area {
+    flex:1;
+    background: #181818;
+    color: #fff;
+    overflow-y:auto;
+    padding:2rem;
+  }
+  .section-title{font-size:1.2rem;margin-bottom:1rem;}
+  .collection {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:1rem;
+  }
+  .card {
+    background:#282828;
+    padding:1rem;
+    border-radius:8px;
+    cursor:pointer;
+    transition:transform .2s;
+  }
+  .card:hover{transform:scale(1.05);}
+  .card img{width:100%; border-radius:4px;}
+  .card-name{margin-top:.6rem; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .card-desc{font-size:.8rem; color:#b3b3b3;}
+
+  /* 🎶 Footer Player */
+  .footer-player {
+    position:absolute;
+    bottom:0;
+    left:240px;
+    right:0;
+    height:90px;
+    background:#181818;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 1rem;
+    color:#b3b3b3;
+  }
+  .current-track {
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+  .current-track img {
+    width:60px; height:60px; border-radius:4px;
+  }
+  .track-info{max-width:200px;}
+  .track-info .title{color:#fff; font-weight:600;}
+  .track-controls {
+    display:flex; align-items:center; gap:1.5rem;
+  }
+  .track-controls button {
+    background:transparent; border:none;
+    color:#b3b3b3; font-size:1.2rem; cursor:pointer;
+  }
+  .track-controls button:hover{color:#fff;}
+  .track-progress {
+    flex:1;
+    margin:0 1rem;
+    display:flex; flex-direction:column; gap:.2rem;
+  }
+  .time-row {
+    display:flex; justify-content:space-between;
+    font-size:.75rem;
+  }
+  .progress-bar {
+    width:100%;
+    height:4px;
+    background:#404040;
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .progress-bar-inner {
+    width:0%; height:100%;
+    background:#1DB954;
+  }
+</style>
 </head>
 <body>
 
-  <header>
-    <div class="container">
-      <h1>Rahul Dhiman</h1>
-      <nav>
-        <ul id="nav-links">
-          <li><a href="#about">About</a></li>
-          <li><a href="#skills">Skills</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-        <button id="menu-toggle">☰</button>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="container">
-      <h2>Hello, I'm Rahul Dhiman</h2>
-      <p>Full Stack Developer in Training at HIIT, Ambala</p>
-    </div>
-  </section>
-
-  <section id="about" class="about">
-    <div class="container">
-      <h2>About Me</h2>
-      <p>
-        I recently completed my 12th from CBSE Board. Currently, I am pursuing a Full Stack course at HIIT, Ambala.
-        My main focus is to become a skilled website developer.
-      </p>
-    </div>
-  </section>
-
-  <section id="skills" class="skills">
-    <div class="container">
-      <h2>My Skills</h2>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">MyPlaylist</div>
+    <nav class="nav">
+      <a onclick="alert('Home clicked');">Home</a>
+      <a onclick="alert('Search clicked');">Search</a>
+      <a onclick="alert('Library clicked');">Your Library</a>
+    </nav>
+    <div class="nav">
+      <strong>Playlists</strong>
       <ul>
-        <li>HTML</li>
-        <li>CSS</li>
-        <li>JavaScript</li>
-        <li>Java (Basics from HIIT)</li>
+        <li><a onclick="alert('Chill Vibes');">Chill Vibes</a></li>
+        <li><a onclick="alert('Workout');">Workout</a></li>
+        <li><a onclick="alert('Top Hits');">Top Hits</a></li>
       </ul>
     </div>
-  </section>
+  </aside>
 
-  <section id="contact" class="contact">
-    <div class="container">
-      <h2>Contact Me</h2>
-      <p>Email: <a href="mailto:rahuldhiman8168@gmail.com">rahuldhiman8168@gmail.com</a></p>
-      <p>Phone: <a href="tel:+918168754225">+91 8168754225</a></p>
+  <!-- Playlist Grid -->
+  <main class="playlist-area">
+    <div class="section-title">Discover</div>
+    <div class="collection" id="collection">
+      <!-- JS-generated -->
     </div>
-  </section>
+  </main>
 
-  <footer>
-    <div class="container">
-      <p>© 2025 Rahul Dhiman</p>
+  <!-- Footer Player -->
+  <div class="footer-player">
+    <div class="current-track">
+      <img id="track-cover" src="" alt="cover">
+      <div class="track-info">
+        <div class="title" id="track-title">Title</div>
+        <div class="artist" id="track-artist">Artist</div>
+      </div>
     </div>
-  </footer>
+    <div class="track-controls">
+      <button onclick="prevTrack()">◀◀</button>
+      <button id="play-btn" onclick="togglePlay()">▶</button>
+      <button onclick="nextTrack()">▶▶</button>
+    </div>
+    <div class="track-progress">
+      <div class="time-row"><span id="current-time">0:00</span><span id="duration">0:00</span></div>
+      <div class="progress-bar" onclick="seek(event)">
+        <div class="progress-bar-inner" id="progress-inner"></div>
+      </div>
+    </div>
+  </div>
 
-  <script src="script.js"></script>
+<script>
+  // 🎵 Mock data
+  const songs = [
+    {title:"Dreamscape", artist:"Luna", cover:"https://picsum.photos/200?random=1", src:"https://cdnsamples/pixabay1.mp3"},
+    {title:"Eclipse", artist:"Solaris", cover:"https://picsum.photos/200?random=2", src:"https://cdnsamples/pixabay2.mp3"},
+    {title:"Journey", artist:"Astra", cover:"https://picsum.photos/200?random=3", src:"https://cdnsamples/pixabay3.mp3"},
+    {title:"Waves", artist:"Coral", cover:"https://picsum.photos/200?random=4", src:"https://cdnsamples/pixabay4.mp3"}
+  ];
+  let currentIndex = 0;
+  const audio = new Audio();
+  const coverEl = document.getElementById('track-cover');
+  const titleEl = document.getElementById('track-title');
+  const artistEl = document.getElementById('track-artist');
+  const playBtn = document.getElementById('play-btn');
+  const currentTimeEl = document.getElementById('current-time');
+  const durationEl = document.getElementById('duration');
+  const progressInner = document.getElementById('progress-inner');
+
+  // 🧱 Build collection UI
+  const col = document.getElementById('collection');
+  songs.forEach((s,i) => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `<img src="${s.cover}" alt=""><div class="card-name">${s.title}</div><div class="card-desc">${s.artist}</div>`;
+    card.onclick = () => {
+      currentIndex = i;
+      loadTrack();
+      playTrack();
+    };
+    col.appendChild(card);
+  });
+
+  function loadTrack(){
+    const s = songs[currentIndex];
+    audio.src = s.src;
+    coverEl.src = s.cover;
+    titleEl.textContent = s.title;
+    artistEl.textContent = s.artist;
+    audio.onloadedmetadata = () => {
+      durationEl.textContent = formatTime(audio.duration);
+    };
+  }
+
+  function playTrack(){
+    audio.play();
+    playBtn.textContent = '❚❚';
+  }
+
+  function pauseTrack(){
+    audio.pause();
+    playBtn.textContent = '▶';
+  }
+
+  function togglePlay(){
+    audio.paused ? playTrack() : pauseTrack();
+  }
+
+  function prevTrack(){
+    currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+    loadTrack();
+    playTrack();
+  }
+
+  function nextTrack(){
+    currentIndex = (currentIndex + 1) % songs.length;
+    loadTrack();
+    playTrack();
+  }
+
+  function updateProgress(){
+    const pct = (audio.currentTime / audio.duration) * 100 || 0;
+    progressInner.style.width = pct + '%';
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  }
+
+  function seek(evt){
+    const pct = evt.offsetX / evt.currentTarget.clientWidth;
+    audio.currentTime = pct * audio.duration;
+  }
+
+  function formatTime(sec){
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2,'0');
+    return `${m}:${s}`;
+  }
+
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('ended', nextTrack);
+
+  loadTrack();
+</script>
+
 </body>
 </html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Next-Gen Mood Music Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+  :root {
+    --primary-color: #1db954;
+    --bg-dark: #121212;
+    --bg-light: #f5f5f7;
+    --glass-bg: rgba(255 255 255 / 0.1);
+    --text-light: #eee;
+    --text-dark: #222;
+    --accent: #ff4e50;
+  }
+
+  /* Reset */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #222 0%, #000 90%);
+  }
+
+  /* Particle canvas full screen */
+  #particles {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .player {
+    position: relative;
+    z-index: 10;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    border-radius: 24px;
+    box-shadow:
+      0 8px 32px rgb(0 0 0 / 0.6),
+      inset 0 0 20px rgb(255 255 255 / 0.07);
+    width: 360px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.8rem;
+    transition: background-color 0.7s ease;
+  }
+
+  /* Album Cover with 3D spin */
+  .album-cover {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    box-shadow:
+      0 0 20px var(--primary-color),
+      inset 0 0 30px var(--primary-color);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.5s ease;
+    perspective: 800px;
+  }
+  .album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 10px var(--primary-color));
+    animation: spin 15s linear infinite paused;
+    transform-style: preserve-3d;
+  }
+  .album-cover.playing img {
+    animation-play-state: running;
+  }
+  @keyframes spin {
+    from {transform: rotateY(0deg);}
+    to {transform: rotateY(360deg);}
+  }
+  .album-cover:hover {
+    box-shadow:
+      0 0 40px var(--primary-color),
+      inset 0 0 50px var(--primary-color);
+  }
+
+  /* Radial Visualizer */
+  .visualizer {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 260px;
+    height: 260px;
+    margin-left: -130px;
+    margin-top: -130px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .bar {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 6px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 3px;
+    transform-origin: bottom center;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 3px var(--primary-color));
+  }
+
+  /* Info */
+  .song-info {
+    text-align: center;
+    user-select: none;
+  }
+  .song-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .song-artist {
+    font-weight: 500;
+    color: #ccc;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+  button.control-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    filter: drop-shadow(0 0 2px #000);
+    user-select: none;
+  }
+  button.control-btn:hover {
+    color: var(--primary-color);
+  }
+  button.control-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Progress bar */
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255 255 255 / 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    margin: 16px 0;
+  }
+  .progress {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-color);
+    border-radius: 10px;
+    transition: width 0.1s linear;
+  }
+  .time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #aaa;
+    user-select: none;
+    margin-top: 4px;
+  }
+
+  /* Volume */
+  .volume-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 120px;
+    height: 6px;
+    background: rgba(255 255 255 / 0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  input[type=range]:hover {
+    background: rgba(255 255 255 / 0.3);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--primary-color);
+    transition: background-color 0.3s ease;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+  }
+  .mute-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    filter: drop-shadow(0 0 2px #000);
+    user-select: none;
+  }
+  .mute-btn:hover {
+    color: var(--primary-color);
+  }
+
+  /* Mood selector */
+  .mood-selector {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 24px;
+    user-select: none;
+  }
+  .mood-btn {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mood-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--primary-color);
+    transition: fill 0.3s ease;
+  }
+  .mood-btn:hover {
+    background: var(--primary-color);
+    color: var(--bg-dark);
+  }
+  .mood-btn:hover svg {
+    fill: var(--bg-dark);
+  }
+  .mood-btn.active {
+    background: var(--primary-color);
+    color: var(--bg-dark);
+  }
+  .mood-btn.active svg {
+    fill: var(--bg-dark);
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 4px var(--primary-color));
+    user-select: none;
+    z-index: 1000;
+  }
+
+  /* Light theme override */
+  body.light {
+    --primary-color: #0d8e79;
+    --bg-dark: #f5f5f7;
+    --text-light: #222;
+    --text-dark: #222;
+    --glass-bg: rgba(255 255 255 / 0.3);
+    background: radial-gradient(circle at center, #d7e9e7 0%, #a7c8c7 90%);
+    color: var(--text-dark);
+  }
+  body.light .player {
+    background: var(--glass-bg);
+    box-shadow:
+      0 8px 32px rgb(255 255 255 / 0.6),
+      inset 0 0 20px rgb(0 0 0 / 0.07);
+  }
+  body.light button.control-btn:hover,
+  body.light .mood-btn:hover,
+  body.light .mood-btn.active,
+  body.light .mute-btn:hover,
+  body.light .theme-toggle {
+    color: var(--primary-color);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="theme-toggle" role="button" tabindex="0" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</div>
+
+<canvas id="particles"></canvas>
+
+<div class="player" role="region" aria-label="Mood-based music player">
+  <div class="album-cover" tabindex="0" aria-label="Album cover">
+    <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80" alt="Album Art" />
+    <canvas class="visualizer" aria-hidden="true"></canvas>
+  </div>
+
+  <div class="song-info" aria-live="polite">
+    <div class="song-title">Loading...</div>
+    <div class="song-artist"></div>
+  </div>
+
+  <div class="controls" role="group" aria-label="Playback controls">
+    <button class="control-btn prev-btn" aria-label="Previous song" title="Previous">⏮️</button>
+    <button class="control-btn play-pause-btn" aria-label="Play/Pause" title="Play/Pause">▶️</button>
+    <button class="control-btn next-btn" aria-label="Next song" title="Next">⏭️</button>
+  </div>
+
+  <div class="progress-container" role="slider" tabindex="0" aria-label="Seek slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="progress"></div>
+  </div>
+  <div class="time">
+    <span class="current-time">0:00</span>
+    <span class="duration">0:00</span>
+  </div>
+
+  <div class="volume-container">
+    <button class="mute-btn" aria-label="Mute/unmute volume" title="Mute/unmute">🔊</button>
+    <input type="range" min="0" max="1" step="0.01" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5" aria-label="Volume slider" value="0.5" />
+  </div>
+
+  <div class="mood-selector" role="radiogroup" aria-label="Select music mood">
+    <button class="mood-btn active" data-mood="chill" role="radio" aria-checked="true" tabindex="0" title="Chill">❄️ Chill</button>
+    <button class="mood-btn" data-mood="happy" role="radio" aria-checked="false" tabindex="-1" title="Happy">🌞 Happy</button>
+    <button class="mood-btn" data-mood="focus" role="radio" aria-checked="false" tabindex="-1" title="Focus">🧠 Focus</button>
+    <button class="mood-btn" data-mood="party" role="radio" aria-checked="false" tabindex="-1" title="Party">🎉 Party</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Songs database — replace URLs with your own or public domain files if you want!
+  const moods = {
+    chill: [
+      {
+        title: "Ocean Breeze",
+        artist: "Calm Sounds",
+        src: "https://cdn.pixabay.com/download/audio/2022/03/14/audio_43e65b88ab.mp3?filename=calm-soundscape-6712.mp3",
+        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        title: "Starry Night",
+        artist: "Dream Walker",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_b2365a8e57.mp3?filename=ambient-chill-10089.mp3",
+        img: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=400&q=80"
+      }
+    ],
+    happy: [
+      {
+        title: "Sunshine Days",
+        artist: "Bright Beats",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_947874e3d9.mp3?filename=upbeat-pop-10046.mp3",
+        img: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        title: "Smile On",
+        artist: "Joy Tunes",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_429d01d1f9.mp3?filename=happy-funk-10062.mp3",
+        img: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80"
+      }
+    ],
+    focus: [
+      {
+        title: "Deep Work",
+        artist: "Concentration",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_ba7de4f6f9.mp3?filename=deep-focus-10079.mp3",
+        img: "https://images.unsplash.com/photo-1496950866446-325a47da4e18?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        title: "Coding Flow",
+        artist: "Mind Mode",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_370678d6b9.mp3?filename=tech-focus-10064.mp3",
+        img: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80"
+      }
+    ],
+    party: [
+      {
+        title: "Night Drive",
+        artist: "DJ Energy",
+        src: "https://cdn.pixabay.com/download/audio/2022/03/20/audio_6c7b6b08c5.mp3?filename=dance-club-6727.mp3",
+        img: "https://images.unsplash.com/photo-1514526585095-c41746248156?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        title: "Electric Pulse",
+        artist: "Dance Beat",
+        src: "https://cdn.pixabay.com/download/audio/2021/10/22/audio_0edc8cc355.mp3?filename=electronic-dance-10040.mp3",
+        img: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=400&q=80"
+      }
+    ]
+  };
+
+  let currentMood = 'chill';
+  let currentIndex = 0;
+  let isPlaying = false;
+  let isMute = false;
+
+  // DOM elements
+  const albumCover = document.querySelector('.album-cover');
+  const albumImg = albumCover.querySelector('img');
+  const songTitle = document.querySelector('.song-title');
+  const songArtist = document.querySelector('.song-artist');
+  const playPauseBtn = document.querySelector('.play-pause-btn');
+  const prevBtn = document.querySelector('.prev-btn');
+  const nextBtn = document.querySelector('.next-btn');
+  const progressContainer = document.querySelector('.progress-container');
+  const progressBar = document.querySelector('.progress');
+  const currentTimeEl = document.querySelector('.current-time');
+  const durationEl = document.querySelector('.duration');
+  const volumeSlider = document.querySelector('input[type="range"]');
+  const muteBtn = document.querySelector('.mute-btn');
+  const moodButtons = document.querySelectorAll('.mood-btn');
+  const themeToggle = document.querySelector('.theme-toggle');
+
+  // Create audio element
+  const audio = new Audio();
+  audio.crossOrigin = "anonymous";
+
+  // Audio context for visualizer
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+  const analyser = audioCtx.createAnalyser();
+  const source = audioCtx.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  analyser.fftSize = 64;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  // Visualizer canvas
+  const visualizerCanvas = document.querySelector('.visualizer');
+  const vCtx = visualizerCanvas.getContext('2d');
+  visualizerCanvas.width = 260;
+  visualizerCanvas.height = 260;
+
+  // Particle canvas
+  const particlesCanvas = document.getElementById('particles');
+  const pCtx = particlesCanvas.getContext('2d');
+  particlesCanvas.width = window.innerWidth;
+  particlesCanvas.height = window.innerHeight;
+
+  // Particle system
+  const particles = [];
+  class Particle {
+    constructor() {
+      this.x = Math.random() * particlesCanvas.width;
+      this.y = Math.random() * particlesCanvas.height;
+      this.size = Math.random() * 2 + 1;
+      this.speedX = (Math.random() - 0.5) * 0.7;
+      this.speedY = (Math.random() - 0.5) * 0.7;
+      this.alpha = Math.random() * 0.4 + 0.1;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0) this.x = particlesCanvas.width;
+      if (this.x > particlesCanvas.width) this.x = 0;
+      if (this.y < 0) this.y = particlesCanvas.height;
+      if (this.y > particlesCanvas.height) this.y = 0;
+    }
+    draw() {
+      pCtx.beginPath();
+      pCtx.fillStyle = `rgba(29, 185, 84, ${this.alpha})`;
+      pCtx.shadowColor = 'rgba(29, 185, 84, 0.8)';
+      pCtx.shadowBlur = 8;
+      pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      pCtx.fill();
+    }
+  }
+
+  for(let i=0; i < 120; i++) {
+    particles.push(new Particle());
+  }
+
+  function animateParticles() {
+    pCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  // Visualizer bars
+  function drawVisualizer() {
+    vCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+    analyser.getByteFrequencyData(dataArray);
+
+    const centerX = visualizerCanvas.width / 2;
+    const centerY = visualizerCanvas.height / 2;
+    const radius = 90;
+    const bars = bufferLength;
+    const barWidth = 6;
+
+    for(let i=0; i < bars; i++) {
+      let angle = (i / bars) * Math.PI * 2;
+      let barHeight = (dataArray[i] / 255) * 60 + 10;
+      let x = centerX + Math.cos(angle) * radius;
+      let y = centerY + Math.sin(angle) * radius;
+
+      vCtx.save();
+      vCtx.translate(x, y);
+      vCtx.rotate(angle);
+      vCtx.fillStyle = `rgba(29, 185, 84, ${dataArray[i]/255})`;
+      vCtx.shadowColor = 'rgba(29,185,84,0.8)';
+      vCtx.shadowBlur = 10;
+      vCtx.fillRect(0, -barWidth/2, barHeight, barWidth);
+      vCtx.restore();
+    }
+    if (isPlaying) requestAnimationFrame(drawVisualizer);
+  }
+
+  // Load song
+  function loadSong() {
+    const song = moods[currentMood][currentIndex];
+    audio.src = song.src;
+    songTitle.textContent = song.title;
+    songArtist.textContent = song.artist;
+    albumImg.src = song.img;
+    updateMoodTheme();
+    progressBar.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
+    durationEl.textContent = '0:00';
+    audio.load();
+  }
+
+  // Update progress
+  function updateProgress() {
+    if (!audio.duration) return;
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progressBar.style.width = progressPercent + '%';
+
+    // Update time display
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    durationEl.textContent = formatTime(audio.duration);
+  }
+
+  // Format seconds to MM:SS
+  function formatTime(time) {
+    const minutes = Math.floor(time / 60) || 0;
+    const seconds = Math.floor(time % 60) || 0;
+    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  }
+
+  // Play or pause toggle
+  function togglePlayPause() {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    if (isPlaying) {
+      audio.pause();
+      albumCover.classList.remove('playing');
+      playPauseBtn.textContent = '▶️';
+    } else {
+      audio.play();
+      albumCover.classList.add('playing');
+      playPauseBtn.textContent = '⏸️';
+      drawVisualizer();
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // Previous song
+  function prevSong() {
+    currentIndex--;
+    if (currentIndex < 0) currentIndex = moods[currentMood].length -1;
+    loadSong();
+    if (isPlaying) audio.play();
+  }
+
+  // Next song
+  function nextSong() {
+    currentIndex++;
+    if (currentIndex >= moods[currentMood].length) currentIndex = 0;
+    loadSong();
+    if (isPlaying) audio.play();
+  }
+
+  // Set progress on click
+  function setProgress(e) {
+    const width = this.clientWidth;
+    const clickX = e.offsetX;
+    if (!audio.duration) return;
+    audio.currentTime = (clickX / width) * audio.duration;
+  }
+
+  // Volume control
+  function setVolume(value) {
+    audio.volume = value;
+    volumeSlider.value = value;
+    if (value === 0) {
+      muteBtn.textContent = '🔈';
+      isMute = true;
+    } else {
+      muteBtn.textContent = '🔊';
+      isMute = false;
+    }
+  }
+
+  // Toggle mute/unmute
+  function toggleMute() {
+    if (!isMute) {
+      audio.volume = 0;
+      volumeSlider.value = 0;
+      muteBtn.textContent = '🔈';
+      isMute = true;
+    } else {
+      audio.volume = 0.5;
+      volumeSlider.value = 0.5;
+      muteBtn.textContent = '🔊';
+      isMute = false;
+    }
+  }
+
+  // Mood change
+  function setMood(mood) {
+    if (currentMood === mood) return;
+    currentMood = mood;
+    currentIndex = 0;
+    loadSong();
+    if (isPlaying) audio.play();
+
+    moodButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mood === mood);
+      btn.setAttribute('aria-checked', btn.dataset.mood === mood);
+      btn.tabIndex = btn.dataset.mood === mood ? 0 : -1;
+    });
+  }
+
+  // Update theme color based on mood
+  function updateMoodTheme() {
+    let color;
+    switch(currentMood) {
+      case 'chill': color = '#1db954'; break;
+      case 'happy': color = '#ffba08'; break;
+      case 'focus': color = '#0d6efd'; break;
+      case 'party': color = '#e94560'; break;
+      default: color = '#1db954';
+    }
+    document.documentElement.style.setProperty('--primary-color', color);
+  }
+
+  // Theme toggle light/dark
+  function toggleTheme() {
+    document.body.classList.toggle('light');
+    if(document.body.classList.contains('light')) {
+      themeToggle.textContent = '🌞';
+    } else {
+      themeToggle.textContent = '🌙';
+    }
+  }
+
+  // Keyboard controls
+  document.body.addEventListener('keydown', e => {
+    if(e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
+    switch(e.key.toLowerCase()) {
+      case ' ':
+        e.preventDefault();
+        togglePlayPause();
+        break;
+      case 'arrowright':
+        nextSong();
+        break;
+      case 'arrowleft':
+        prevSong();
+        break;
+      case 'arrowup':
+        setVolume(Math.min(audio.volume + 0.1, 1));
+        break;
+      case 'arrowdown':
+        setVolume(Math.max(audio.volume - 0.1, 0));
+        break;
+      case 'm':
+        toggleMute();
+        break;
+      case 't':
+        toggleTheme();
+        break;
+    }
+  });
+
+  // Event listeners
+  playPauseBtn.addEventListener('click', togglePlayPause);
+  prevBtn.addEventListener('click', prevSong);
+  nextBtn.addEventListener('click', nextSong);
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('ended', nextSong);
+  progressContainer.addEventListener('click', setProgress);
+  volumeSlider.addEventListener('input', e => setVolume(e.target.value));
+  muteBtn.addEventListener('click', toggleMute);
+  themeToggle.addEventListener('click', toggleTheme);
+  moodButtons.forEach(btn => btn.addEventListener('click', () => setMood(btn.dataset.mood)));
+  albumCover.addEventListener('click', togglePlayPause);
+  albumCover.addEventListener('keypress', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      togglePlayPause();
+    }
+  });
+
+  // Initialize volume and load first song
+  setVolume(0.5);
+  loadSong();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neon Music by Rahul Dhiman</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+  body,html {height:100%; overflow:hidden; background:#111; color:#eee;}
+  canvas#bg {position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1}
+  nav {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1rem 2rem; background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(10px); position:sticky; top:0; z-index:10;
+  }
+  .logo {
+    font-size:1.6rem; font-weight:700;
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    -webkit-text-fill-color:transparent;
+    -webkit-background-clip:text;
+  }
+  .nav-links {display:flex; gap:1.2rem;}
+  .nav-links a {
+    color:#ccc; padding:0.3rem 0.5rem; border-radius:6px;
+    transition:all 0.3s;
+  }
+  .nav-links a:hover {
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    color:#000; transform:scale(1.05);
+  }
+  .search {
+    position:relative;
+  }
+  .search input {
+    padding:0.4rem 1rem;
+    border-radius:20px;
+    border:none;
+    width:200px;
+    transition:width 0.3s ease;
+  }
+  .search input:focus {width:280px; outline:none;}
+  .search button {
+    position:absolute;
+    right:4px; top:4px;
+    background:transparent;
+    border:none;
+    color:#888;
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .container {padding:4rem 2rem 8rem; max-width:1200px; margin:0 auto;}
+  .genres {
+    display:flex; gap:1rem; margin-bottom:2rem; flex-wrap:wrap;
+  }
+  .genre {
+    padding:0.6rem 1.2rem; border-radius:30px;
+    background:rgba(255,255,255,0.1);
+    cursor:pointer; transition:all 0.3s;
+  }
+  .genre.active {
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    color:#000; transform:scale(1.1);
+  }
+  .songs-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:1.5rem;
+  }
+  .song-card {
+    background:rgba(255,255,255,0.05);
+    padding:1rem; border-radius:12px;
+    cursor:pointer;
+    transition:transform 0.3s, box-shadow 0.3s;
+    position:relative;
+  }
+  .song-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,255,195,0.3);
+  }
+  .song-card img {
+    width:100%; border-radius:8px; margin-bottom:0.8rem;
+  }
+  .song-info {
+    display:flex; justify-content:space-between;
+    align-items:center;
+  }
+  .song-title {font-weight:500;}
+  .song-info button {
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    border:none; padding:0.4rem; border-radius:50%; color:#000;
+    transition:transform 0.2s;
+  }
+  .song-info button:hover {transform:scale(1.2);}
+  .song-artist {color:#aaa; margin-top:0.4rem;}
+  .extras {
+    margin-top:1rem; display:flex; gap:1rem;
+  }
+  .extras button {
+    background:rgba(255,255,255,0.1);
+    color:#ccc; padding:0.5rem 1rem;
+    border-radius:20px; transition:all 0.3s;
+  }
+  .extras button:hover {
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    color:#000; transform:scale(1.05);
+  }
+  .player {
+    position:fixed; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(10px); padding:0.8rem 1.5rem;
+    display:flex; align-items:center; gap:1rem;
+    box-shadow:0 -5px 20px rgba(0,0,0,0.5);
+  }
+  .player img {
+    width:50px; height:50px; border-radius:6px;
+  }
+  .player .info {
+    flex:1;
+  }
+  .player .controls {
+    display:flex; gap:1rem; align-items:center;
+  }
+  .player .controls button {
+    background:none; border:none; color:#eee; font-size:1.2rem;
+    transition:color 0.2s;
+    cursor:pointer;
+  }
+  .player .controls button:hover { color:#1db954; }
+  .player .bar {
+    flex:1; height:4px; background:#444;
+    border-radius:2px; overflow:hidden; margin-left:1rem;
+  }
+  .player .fill {
+    width:0%; height:100%;
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+  }
+  footer {
+    position:fixed; bottom:60px; width:100%;
+    text-align:center; font-size:1rem;
+    animation:fadeMove 3s ease-in-out infinite alternate;
+  }
+  @keyframes fadeMove {
+    0% {opacity:0; transform:translateY(20px);}
+    100% {opacity:1; transform:translateY(0);}
+  }
+  @media(max-width:768px){
+    nav input {display:none;}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<nav>
+  <div class="logo">Dhiman's music player </div>
+  <div class="nav-links">
+    <a>Home</a><a>Discover</a><a>Radio</a><a>Library</a>
+  </div>
+  <form class="search" action="https://www.google.com/search" target="_blank">
+    <input type="text" name="q" placeholder="Search songs..." />
+    <button type="submit">🔍</button>
+  </form>
+</nav>
+
+<div class="container">
+  <div class="genres">
+    <div class="genre active" data-genre="all">All</div>
+    <div class="genre" data-genre="pop">Pop</div>
+    <div class="genre" data-genre="rock">Rock</div>
+    <div class="genre" data-genre="jazz">Jazz</div>
+    <div class="genre" data-genre="punjabi">Punjabi</div>
+  </div>
+  <div class="songs-grid" id="songs-grid"></div>
+  <div class="extras">
+    <button>Shuffle</button>
+    <button>Repeat</button>
+    <button>My Playlist</button>
+    <button>Settings</button>
+  </div>
+</div>
+
+<div class="player">
+  <img id="track-cover" src="" alt="cover">
+  <div class="info">
+    <div id="track-title">Title</div>
+    <div id="track-artist">Artist</div>
+  </div>
+  <div class="controls">
+    <button id="prev">⏮️</button>
+    <button id="play">▶️</button>
+    <button id="next">⏭️</button>
+  </div>
+  <div class="bar"><div class="fill" id="player-fill"></div></div>
+</div>
+
+<footer>Thanks for visiting Rahul Dhiman's website 🎶</footer>
+
+<script>
+  // Animate background particles
+  const canvas = document.getElementById('bg'), ctx=canvas.getContext('2d');
+  let w,h, particles=[];
+  function resize(){w=canvas.width=innerWidth; h=canvas.height=innerHeight;}
+  window.onresize=resize; resize();
+  for(let i=0;i<150;i++){
+    particles.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,
+      vx:(Math.random()-0.5)*0.6, vy:(Math.random()-0.5)*0.6});
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w)p.x=Math.random()*w;
+      if(p.y<0||p.y>h)p.y=Math.random()*h;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+      ctx.fillStyle='rgba(0,255,195,0.3)'; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // Song data
+  const allSongs=[  
+    {title:'Electric Dreams',artist:'Synthwave',genre:'electronic',cover:'https://picsum.photos/200?random=11',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_6291.mp3?filename=synthwave.mp3'},
+    {title:'Midnight City',artist:'The Neons',genre:'pop',cover:'https://picsum.photos/200?random=22',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_4291.mp3?filename=popbeat.mp3'},
+    {title:'Rock On',artist:'The Rockers',genre:'rock',cover:'https://picsum.photos/200?random=33',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_1291.mp3?filename=rock.mp3'},
+    {title:'Smooth Jazz',artist:'Blue Notes',genre:'jazz',cover:'https://picsum.photos/200?random=44',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_2291.mp3?filename=jazz.mp3'},
+    {title:'Karma',artist:'Babu Maan',genre:'punjabi',cover:'https://picsum.photos/200?random=55',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_3291.mp3?filename=punjabi1.mp3'},
+    {title:'Japan',artist:'Karan Aujla',genre:'punjabi',cover:'https://picsum.photos/200?random=66',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_4299.mp3?filename=punjabi2.mp3'},
+    {title:'Chamma Y',artist:'Chima Y',genre:'punjabi',cover:'https://picsum.photos/200?random=77',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_5291.mp3?filename=punjabi3.mp3'},
+    {title:'Naam',artist:'Rahul Dhiman',genre:'punjabi',cover:'https://picsum.photos/200?random=88',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_6299.mp3?filename=punjabi4.mp3'}
+  ];
+
+  const grid=document.getElementById('songs-grid');
+  const genres=document.querySelectorAll('.genre');
+  let current=-1,audio=new Audio();
+  const coverEl=document.getElementById('track-cover'),
+    titleEl=document.getElementById('track-title'),
+    artistEl=document.getElementById('track-artist');
+  const playBtn=document.getElementById('play'),
+    prevBtn=document.getElementById('prev'),
+    nextBtn=document.getElementById('next'),
+    fillEl=document.getElementById('player-fill');
+
+  function render(){
+    let sel = [...genres].find(g=>g.classList.contains('active')).dataset.genre;
+    grid.innerHTML = '';
+    allSongs.filter(s=>sel=='all'||s.genre==sel).forEach((s,i)=>{
+      let c=document.createElement('div'); c.className='song-card';
+      c.innerHTML=`<img src="${s.cover}"><div class="song-info"><span class="song-title">${s.title}</span>
+        <button onclick="playSong(${i});event.stopPropagation()">▶️</button>
+        </div><div class="song-artist">${s.artist}</div>`;
+      c.onclick=()=>playSong(i);
+      grid.appendChild(c);
+    });
+  }
+  genres.forEach(g=>g.addEventListener('click',()=>{
+    genres.forEach(x=>x.classList.remove('active'));
+    g.classList.add('active');
+    render();
+  }));
+  render();
+
+  function playSong(i){
+    let s=allSongs[i];
+    current=i; audio.src=s.src; audio.play();
+    coverEl.src=s.cover; titleEl.textContent=s.title; artistEl.textContent=s.artist;
+    playBtn.textContent='⏸️';
+  }
+  playBtn.onclick=()=>audio.paused?audio.play():audio.pause();
+  prevBtn.onclick=()=>playSong((current-1+allSongs.length)%allSongs.length);
+  nextBtn.onclick=()=>playSong((current+1)%allSongs.length);
+  audio.ontimeupdate=()=>fillEl.style.width=(audio.currentTime/audio.duration*100)+'%';
+  audio.onplay=()=>playBtn.textContent='⏸️';
+  audio.onpause=()=>playBtn.textContent='▶️';
+</script>
+</body>
+</html>

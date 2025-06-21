@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Animated Haveli Garden</title>
+<style>
+  /* Base styles */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body, html { width: 100%; height: 100%; overflow: hidden; background-color: #b0e0e6; }
+  #scene { position: relative; width: 100%; height: 100%; }
+
+  /* Soil & grass */
+  .ground {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+    background: linear-gradient(to top, #654321 0%, #228B22 100%);
+  }
+
+  /* Haveli building */
+  .haveli {
+    position: absolute; bottom: 40%; left: 50%; transform: translateX(-50%);
+    width: 70%; max-width: 1000px; height: 50%; background: #e0c097;
+    border: 8px solid #b07f47; border-radius: 0 0 20px 20px;
+    display: flex; justify-content: space-around; align-items: flex-end;
+  }
+  .tower {
+    width: 15%; height: 80%; background: #d4a373;
+    border: 6px solid #b07f47; border-top-left-radius: 20px; border-top-right-radius: 20px;
+    position: relative;
+  }
+  .tower::after {
+    content: "";
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 40px; background: #b07f47; border-radius: 5px 5px 0 0;
+  }
+  .main-door {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 160px; background: #8b4513; border: 6px solid #654321;
+    border-radius: 0 0 10px 10px;
+  }
+
+  /* Garden features */
+  .car, .bike, .swing {
+    position: absolute; bottom: 45%;
+    background-repeat: no-repeat; background-size: contain;
+  }
+  .car {
+    left: 10%;
+    width: 180px; height: 90px;
+    background-image: url('https://cdn.pixabay.com/photo/2016/01/20/18/35/car-1151491_1280.png');
+  }
+  .bike {
+    left: 30%;
+    width: 120px; height: 80px;
+    background-image: url('https://cdn.pixabay.com/photo/2017/07/31/11/21/motorbike-2551399_1280.png');
+  }
+
+  /* Swing set */
+  .swing-set {
+    position: absolute; bottom: 47%; right: 12%;
+    width: 150px; height: 200px;
+  }
+  .swing-pole {
+    position: absolute; width: 8px; height: 200px;
+    background: #654321;
+  }
+  .swing-pole.left { left: 0; }
+  .swing-pole.right { right: 0; }
+  .swing-seat {
+    position: absolute; bottom: 0; left: 50%; width: 80px; height: 20px;
+    background: #8b4513; transform: translateX(-50%);
+  }
+  .swing-rope {
+    position: absolute; width: 4px; height: 120px;
+    background: #ccc;
+  }
+  .rope-left { left: calc(50% - 40px); }
+  .rope-right { left: calc(50% + 36px); }
+  .swing-wrapper {
+    position: absolute; width: 100%; height: 200px;
+    transform-origin: top center;
+    animation: sway 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes sway {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(5deg); }
+  }
+
+</style>
+</head>
+<body>
+  <div id="scene">
+    <div class="ground"></div>
+    <div class="car"></div>
+    <div class="bike"></div>
+    <div class="haveli">
+      <div class="tower"></div>
+      <div class="tower"></div>
+      <div class="main-door"></div>
+    </div>
+    <div class="swing-set">
+      <div class="swing-wrapper">
+        <div class="swing-pole left"></div>
+        <div class="swing-pole right"></div>
+        <div class="swing-rope rope-left"></div>
+        <div class="swing-rope rope-right"></div>
+        <div class="swing-seat"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

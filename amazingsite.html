@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultra Music Player by Rahul Dhiman</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+  body, html { height:100%; overflow:hidden; background:#111; color:#eee;}
+
+  /* Animated Particle Background */
+  canvas#bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+
+  /* Navbar */
+  nav {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1rem 2rem; background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(10px); position:sticky; top:0; z-index:10;
+  }
+  nav .logo { font-size:1.6rem; font-weight:700; background:linear-gradient(45deg,#1db954,#00ffc3); 
+    -webkit-text-fill-color:transparent; -webkit-background-clip:text;
+  }
+  nav .nav-links { display:flex; gap:1.2rem; }
+  nav .nav-links a {
+    color:#ccc; text-decoration:none; position:relative;
+    padding:0.3rem 0.5rem; border-radius:6px;
+    transition:color 0.3s, background 0.3s, transform 0.3s;
+  }
+  nav .nav-links a:hover{
+    background:linear-gradient(45deg,#1db954,#00ffc3);
+    color:#000; transform:scale(1.05);
+  }
+  nav .search-container {
+    position:relative;
+  }
+  nav input[type="text"]{
+    padding:0.4rem 1rem; border-radius:20px;
+    border:none; width:200px; transition:width 0.3s ease;
+  }
+  nav input[type="text"]:focus{ width:280px; outline:none; }
+
+  /* Main Layout */
+  .container { padding:4rem 2rem 8rem; max-width:1200px; margin:0 auto; }
+
+  /* Genre Tabs */
+  .genres { display:flex; gap:1rem; margin-bottom:2rem; }
+  .genre { padding:0.6rem 1.2rem; border-radius:30px; background:rgba(255,255,255,0.1);
+    cursor:pointer; user-select:none;
+    transition:background 0.3s, transform 0.2s;
+  }
+  .genre.active { background:linear-gradient(45deg,#1db954,#00ffc3); color:#000; transform:scale(1.1); }
+  .genre:hover { background:rgba(255,255,255,0.2); }
+
+  /* Song Grid */
+  .songs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.5rem; }
+  .song-card {
+    background:rgba(255,255,255,0.05); padding:1rem; border-radius:12px; position:relative;
+    overflow:hidden; cursor:pointer;
+    transition:transform 0.3s, box-shadow 0.3s;
+  }
+  .song-card:hover {
+    transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,255,195,0.3);
+  }
+  .song-card img {
+    width:100%; border-radius:8px; margin-bottom:0.8rem;
+  }
+  .song-info { display:flex; justify-content:space-between; align-items:center; }
+  .song-info .title { font-weight:500; }
+  .song-info button {
+    background:linear-gradient(45deg,#1db954,#00ffc3); border:none;
+    padding:0.4rem 0.6rem; border-radius:50%; color:#000;
+    transition:transform 0.2s;
+  }
+  .song-info button:hover{ transform:scale(1.2); }
+
+  /* Footer Player */
+  .player {
+    position:fixed; bottom:0; left:0; right:0;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(10px);
+    padding:0.8rem 1.5rem; display:flex; align-items:center;
+    gap:1rem; box-shadow:0 -5px 20px rgba(0,0,0,0.5);
+  }
+  .player img { width:50px; height:50px; border-radius:6px; }
+  .player .info { flex:1; }
+  .player .controls { display:flex; gap:1rem; align-items:center; }
+  .player .controls button {
+    background:none; border:none; color:#eee; font-size:1.2rem;
+    transition:color 0.2s;
+  }
+  .player .controls button:hover{ color:#1db954; }
+  .player .bar { flex:1; height:4px; background:#444; border-radius:2px; overflow:hidden; }
+  .player .fill { width:0%; height:100%; background:linear-gradient(45deg,#1db954,#00ffc3); }
+
+  /* Bottom Footer */
+  footer {
+    position:fixed; bottom:50px; width:100%; text-align:center;
+    font-size:1rem; pointer-events:none;
+    animation:fadeMove 3s ease-in-out infinite alternate;
+  }
+  @keyframes fadeMove {
+    0% { opacity:0; transform:translateY(20px); }
+    100% { opacity:1; transform:translateY(0); }
+  }
+
+  /* Responsive */
+  @media(max-width:768px){
+    nav input[type="text"]{ display:none; }
+    .genres { flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<nav>
+  <div class="logo">NeonTunes</div>
+  <div class="nav-links">
+    <a>Home</a><a>Browse</a><a>Library</a><a>Radio</a>
+  </div>
+  <div class="search-container">
+    <input type="text" id="search" placeholder="Search songs..."/>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="genres">
+    <div class="genre active" data-genre="all">All</div>
+    <div class="genre" data-genre="pop">Pop</div>
+    <div class="genre" data-genre="rock">Rock</div>
+    <div class="genre" data-genre="jazz">Jazz</div>
+    <div class="genre" data-genre="electronic">Electronic</div>
+  </div>
+
+  <div class="songs-grid" id="songs-grid">
+    <!-- songs inserted here -->
+  </div>
+</div>
+
+<!-- Footer Music Player -->
+<div class="player">
+  <img id="track-cover" src="" alt="cover">
+  <div class="info">
+    <div id="track-title">Title</div>
+    <div id="track-artist">Artist</div>
+  </div>
+  <div class="controls">
+    <button id="prev">&#9664;&#9664;</button>
+    <button id="play">&#9654;</button>
+    <button id="next">&#9654;&#9654;</button>
+  </div>
+  <div class="bar"><div class="fill" id="player-fill"></div></div>
+</div>
+
+<footer>Thanks for visiting Rahul Dhiman's website 🎶</footer>
+
+<script>
+  // Particle Background
+  const canvas = document.getElementById('bg'), ctx=canvas.getContext('2d');
+  let w,h, particles=[];
+  function resize(){w=canvas.width=innerWidth; h=canvas.height=innerHeight;}
+  window.onresize=resize; resize();
+  for(let i=0;i<120;i++){
+    particles.push({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*2+1,
+      vx:(Math.random()-0.5)*0.5,
+      vy:(Math.random()-0.5)*0.5
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w)p.x=Math.random()*w;
+      if(p.y<0||p.y>h)p.y=Math.random()*h;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+      ctx.fillStyle='rgba(0,255,195,0.4)'; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // Mock Songs Data
+  const allSongs = [
+    {title:'Electric Dreams',artist:'Synthwave',genre:'electronic',cover:'https://picsum.photos/200?random=11',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_6291.mp3?filename=synthwave.mp3'},
+    {title:'Midnight City',artist:'The Neons',genre:'pop',cover:'https://picsum.photos/200?random=22',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_4291.mp3?filename=popbeat.mp3'},
+    {title:'Rock On',artist:'The Rockers',genre:'rock',cover:'https://picsum.photos/200?random=33',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_1291.mp3?filename=rock.mp3'},
+    {title:'Smooth Jazz',artist:'Blue Notes',genre:'jazz',cover:'https://picsum.photos/200?random=44',src:'https://cdn.pixabay.com/download/audio/2021/10/22/audio_2291.mp3?filename=jazz.mp3'}
+  ];
+
+  const grid = document.getElementById('songs-grid');
+  const genres = document.querySelectorAll('.genre');
+  const searchInput = document.getElementById('search');
+
+  // Filter & Render
+  function renderSongs(){
+    let sel = [...genres].find(g=>g.classList.contains('active')).dataset.genre;
+    let term = searchInput.value.toLowerCase();
+    let list=allSongs.filter(s=>(sel==='all'||s.genre===sel) && (s.title.toLowerCase().includes(term)||s.artist.toLowerCase().includes(term)));
+    grid.innerHTML='';
+    list.forEach((s,i)=>{
+      let card=document.createElement('div');
+      card.className='song-card';
+      card.innerHTML = `<img src="${s.cover}"><div class="song-info">
+         <span class="title">${s.title}</span>
+         <button onclick="playSong(${i});event.stopPropagation()">▶</button>
+         </div><div class="artist">${s.artist}</div>`;
+      card.onclick=()=>playSong(i);
+      grid.appendChild(card);
+    });
+  }
+  genres.forEach(g=>g.addEventListener('click',()=>{
+    genres.forEach(x=>x.classList.remove('active'));
+    g.classList.add('active');
+    renderSongs();
+  }));
+  searchInput.addEventListener('input',renderSongs);
+
+  // Footer Player Logic
+  let current=-1, audio=new Audio(), playBtn=document.getElementById('play');
+  function playSong(i){
+    const song = allSongs[i];
+    current = i;
+    audio.src=song.src; audio.play();
+    document.getElementById('track-cover').src=song.cover;
+    document.getElementById('track-title').textContent=song.title;
+    document.getElementById('track-artist').textContent=song.artist;
+    playBtn.textContent='❚❚';
+  }
+  playBtn.addEventListener('click',()=> audio.paused? audio.play():audio.pause());
+  document.getElementById('prev').addEventListener('click',()=>{
+    current = (current<=0?allSongs.length-1:current-1); playSong(current);
+  });
+  document.getElementById('next').addEventListener('click',()=>{
+    current = (current+1)%allSongs.length; playSong(current);
+  });
+  audio.addEventListener('play',()=>playBtn.textContent='❚❚');
+  audio.addEventListener('pause',()=>playBtn.textContent='▶');
+  audio.addEventListener('timeupdate',()=>{
+    let pct=(audio.currentTime/audio.duration)*100;
+    document.getElementById('player-fill').style.width = pct+'%';
+  });
+
+  renderSongs();
+</script>
+</body>
+</html>
